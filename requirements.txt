@@ -1,0 +1,4 @@
+streamlit
+requests
+azure-cognitiveservices-speech
+pandas

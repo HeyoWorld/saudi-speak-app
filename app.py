@@ -242,6 +242,9 @@ with col1:
                     st.error(f"Error: {data['error']}")
 
 # Results Area
+# --- Replace EVERYTHING from "# Results Area" downwards with this: ---
+
+# Results Area
 if 'result' in st.session_state:
     data = st.session_state['result']
     
@@ -249,11 +252,13 @@ if 'result' in st.session_state:
     
     # 1. Feedback Section
     if data.get('feedback_note'):
-        st.markdown(f"""
+        # 使用变量拆分，避免 f-string 语法错误
+        feedback_html = f"""
         <div class="feedback-box">
             <strong>💡 Coach's Note:</strong> {data['feedback_note']}
         </div>
-        """, unsafe_allow_html=True)
+        """
+        st.markdown(feedback_html, unsafe_allow_html=True)
     
     # 2. Full Audio Player
     st.markdown("### 🎧 Full Audio Drill")
@@ -268,6 +273,42 @@ if 'result' in st.session_state:
     for idx, sent in enumerate(data.get('sentences', [])):
         # Card Container
         with st.container():
-            st.markdown(f"""
+            # 这里是容易报错的地方，我把它拆开了
+            segment_text = sent.get('segment', '')
+            translation_text = sent.get('translation', '')
+            
+            card_html = f"""
             <div class="sentence-card">
-                <div class="rtl">{sent['segment']}</div>
+                <div class="rtl">{segment_text}</div>
+                <div style="color: #64748b; margin-top: 10px; font-weight: 500;">{translation_text}</div>
+            </div>
+            """
+            st.markdown(card_html, unsafe_allow_html=True)
+            
+            # Controls for this sentence
+            c1, c2 = st.columns([1, 5])
+            with c1:
+                # Individual Audio
+                s_audio = generate_audio_azure(segment_text, azure_speech_key, azure_region, voice_name, speech_rate)
+                if s_audio: st.audio(s_audio, format='audio/wav')
+            
+            # Word Analysis (Collapsible)
+            with st.expander(f"🔍 Inspect Words (Sentence {idx+1})"):
+                # Table Header
+                h1, h2, h3 = st.columns([2, 2, 1])
+                h1.markdown("**Word**")
+                h2.markdown("**Meaning**")
+                h3.markdown("**Root**")
+                st.markdown("---")
+                
+                for w in sent.get('words', []):
+                    r1, r2, r3 = st.columns([2, 2, 1])
+                    
+                    word_text = w.get('word', '')
+                    word_meaning = w.get('meaning', '')
+                    word_root = w.get('root', '-')
+                    
+                    # 使用单引号 f-string，避免混淆
+                    with r1: st.markdown(f"<span class='arabic-word'>{word_text}</span>", unsafe_allow_html=True)
+                    with r2: st.write(word_meaning)
+                    with r3: st.code(word_root)
