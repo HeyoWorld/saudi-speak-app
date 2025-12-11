@@ -193,7 +193,7 @@ def analyze_text(text, api_key, style):
     
     # 使用比较稳的 Gemini Flash 1.5
     payload = {
-        "model": "google/gemini-2.0-flash-exp:free", 
+        "model": "google/gemini-2.0-flash-lite-001", 
         "messages": [{"role": "user", "content": prompt}],
         "response_format": { "type": "json_object" }
     }
